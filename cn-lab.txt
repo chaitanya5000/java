@@ -1,0 +1,201 @@
+2. Detecting Error using CRC-CCITT
+
+
+import java.util.Scanner;
+
+public class CRC_CCITT {
+    static int crc16(byte[] data) {
+        int crc = 0xFFFF;
+        for (byte b : data) {
+            crc ^= (b << 8);
+            for (int i = 0; i < 8; i++)
+                crc = (crc & 0x8000) != 0 ? (crc << 1) ^ 0x1021 : crc << 1;
+        }
+        return crc & 0xFFFF;
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter message: ");
+        byte[] data = sc.nextLine().getBytes();
+        int crc = crc16(data);
+        System.out.printf("CRC: %04X\n", crc);
+        sc.close();
+    }
+}
+
+
+3.Bit Stuffing
+
+import java.util.Scanner;
+
+public class BitStuffing {
+    public static String bitStuff(String data) {
+        return "01111110" + data.replaceAll("11111", "111110") + "01111110";
+    }
+
+    public static String bitUnstuff(String stuffedData) {
+        return stuffedData.substring(8, stuffedData.length() - 8).replaceAll("111110", "11111");
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter bit sequence: ");
+        String data = sc.next();
+        String stuffed = bitStuff(data);
+        System.out.println("Stuffed: " + stuffed);
+        System.out.println("Unstuffed: " + bitUnstuff(stuffed));
+        sc.close();
+    }
+}
+
+
+4.Character Stuffing
+
+import java.util.Scanner;
+
+public class CharacterStuffing {
+    public static String charStuff(String data, char flag, char esc) {
+        return flag + data.replace("" + flag, "" + esc + flag).replace("" + esc, "" + esc + esc) + flag;
+    }
+
+    public static String charUnstuff(String stuffedData, char flag, char esc) {
+        return stuffedData.substring(1, stuffedData.length() - 1).replace("" + esc + flag, "" + flag).replace("" + esc + esc, "" + esc);
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter message: ");
+        String data = sc.nextLine();
+        char FLAG = '#', ESC = '/';
+        String stuffed = charStuff(data, FLAG, ESC);
+        System.out.println("Stuffed: " + stuffed);
+        System.out.println("Unstuffed: " + charUnstuff(stuffed, FLAG, ESC));
+        sc.close();
+    }
+}
+
+
+5. Stop and Wait Protocol
+
+import java.util.Scanner;
+import java.util.Random;
+
+public class StopAndWait {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter number of frames: ");
+        int n = sc.nextInt();
+        Random rand = new Random();
+        for (int i = 1; i <= n; i++) {
+            System.out.println("Sending frame " + i);
+            if (rand.nextInt(10) < 2) {
+                System.out.println("Frame " + i + " lost, resending...");
+                i--;
+            } else {
+                System.out.println("Acknowledgment received for frame " + i);
+            }
+        }
+        sc.close();
+    }
+}
+
+
+6. Dijkstra’s Algorithm
+
+import java.util.*;
+
+public class Dijkstra {
+    static void dijkstra(int[][] graph, int src) {
+        int n = graph.length;
+        int[] dist = new int[n];
+        boolean[] visited = new boolean[n];
+        Arrays.fill(dist, Integer.MAX_VALUE);
+        dist[src] = 0;
+        for (int i = 0; i < n - 1; i++) {
+            int u = -1;
+            for (int j = 0; j < n; j++)
+                if (!visited[j] && (u == -1 || dist[j] < dist[u])) u = j;
+            visited[u] = true;
+            for (int v = 0; v < n; v++)
+                if (graph[u][v] != 0 && !visited[v] && dist[u] + graph[u][v] < dist[v])
+                    dist[v] = dist[u] + graph[u][v];
+        }
+        System.out.println("Shortest distances: " + Arrays.toString(dist));
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter number of nodes: ");
+        int n = sc.nextInt();
+        int[][] graph = new int[n][n];
+        System.out.println("Enter adjacency matrix:");
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                graph[i][j] = sc.nextInt();
+        System.out.print("Enter source node: ");
+        int src = sc.nextInt();
+        dijkstra(graph, src);
+        sc.close();
+    }
+}
+
+
+7. Distance Vector Algorithm
+
+import java.util.*;
+
+public class DistanceVector {
+    static final int INF = 999;
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter number of nodes: ");
+        int n = sc.nextInt();
+        int[][] cost = new int[n][n];
+        System.out.println("Enter cost matrix:");
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                cost[i][j] = sc.nextInt();
+        int[][] dist = new int[n][n];
+        for (int i = 0; i < n; i++) 
+            System.arraycopy(cost[i], 0, dist[i], 0, n);
+        for (int k = 0; k < n; k++)
+            for (int i = 0; i < n; i++)
+                for (int j = 0; j < n; j++)
+                    if (dist[i][k] + dist[k][j] < dist[i][j])
+                        dist[i][j] = dist[i][k] + dist[k][j];
+        for (int[] row : dist)
+            System.out.println(Arrays.toString(row));
+        sc.close();
+    }
+}
+
+
+8. Leaky Bucket Algorithm
+
+import java.util.*;
+
+public class LeakyBucket {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter bucket size: ");
+        int bucketSize = sc.nextInt();
+        System.out.print("Enter output rate: ");
+        int outputRate = sc.nextInt();
+        System.out.print("Enter number of packets: ");
+        int n = sc.nextInt();
+        int[] packets = new int[n];
+        System.out.println("Enter packets:");
+        for (int i = 0; i < n; i++) packets[i] = sc.nextInt();
+        int remaining = 0;
+        for (int p : packets) {
+            remaining = Math.min(bucketSize, remaining + p);
+            System.out.println("Bucket has " + remaining + " packets");
+            remaining = Math.max(0, remaining - outputRate);
+        }
+        sc.close();
+    }
+}
+
+
